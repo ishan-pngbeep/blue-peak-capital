@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blue Peak Capital</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080c14; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+  
+  header { background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 100%); border-bottom: 1px solid #1e3a5f; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .logo span { font-size: 12px; font-weight: 400; color: #64748b; display: block; -webkit-text-fill-color: #64748b; }
+  .mode-badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; background: #0f2a1a; color: #34d399; border: 1px solid #065f46; }
+  .mode-badge.demo { background: #1c1208; color: #fbbf24; border-color: #92400e; }
+
+  nav { background: #0a1628; border-bottom: 1px solid #1e3a5f; padding: 0 32px; display: flex; gap: 0; }
+  .nav-tab { padding: 14px 24px; font-size: 14px; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .nav-tab:hover { color: #94a3b8; }
+  .nav-tab.active { color: #38bdf8; border-bottom-color: #38bdf8; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  .search-bar { display: flex; gap: 12px; margin-bottom: 32px; }
+  .search-input { flex: 1; background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 10px; padding: 14px 20px; color: #e2e8f0; font-size: 15px; outline: none; transition: border 0.2s; }
+  .search-input:focus { border-color: #38bdf8; }
+  .search-input::placeholder { color: #475569; }
+  .btn { padding: 14px 28px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-demo { background: #1e293b; color: #fbbf24; border: 1px solid #92400e; }
+  .btn-demo:hover { background: #2d3748; }
+
+  .macro-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .macro-card { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 10px; padding: 14px 18px; }
+  .macro-label { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .macro-value { font-size: 18px; font-weight: 600; color: #38bdf8; }
+
+  .fg-bar { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 10px; padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: center; gap: 20px; }
+  .fg-label { font-size: 12px; color: #64748b; }
+  .fg-value { font-size: 24px; font-weight: 700; }
+  .fg-track { flex: 1; height: 8px; background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #16a34a); border-radius: 4px; position: relative; }
+  .fg-dot { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: -4px; transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+  .fg-tag { font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 20px; }
+
+  .insight-card { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 14px; padding: 24px; margin-bottom: 20px; transition: border-color 0.2s; }
+  .insight-card:hover { border-color: #38bdf8; }
+  .insight-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .insight-sector { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .insight-horizon { font-size: 12px; color: #64748b; }
+  .trend-badge { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+  .trend-bull { background: #0f2a1a; color: #34d399; border: 1px solid #065f46; }
+  .trend-bear { background: #2a0f0f; color: #f87171; border: 1px solid #7f1d1d; }
+  .trend-neu { background: #1a1a0f; color: #fbbf24; border: 1px solid #78350f; }
+
+  .confidence-bar { margin-bottom: 20px; }
+  .confidence-label { font-size: 12px; color: #64748b; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .confidence-track { height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; }
+  .confidence-fill { height: 100%; border-radius: 3px; background: linear-gradient(to right, #0ea5e9, #6366f1); transition: width 1s ease; }
+
+  .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .insight-section { background: #080c14; border-radius: 10px; padding: 14px 16px; }
+  .insight-section-title { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .tag { display: inline-block; background: #1e3a5f; color: #7dd3fc; border-radius: 6px; padding: 3px 10px; font-size: 12px; margin: 3px 3px 3px 0; }
+  .tag-risk { background: #2a1515; color: #fca5a5; }
+  .insight-text { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+
+  .forward-box { background: linear-gradient(135deg, #0a1628, #0f172a); border: 1px solid #1e3a5f; border-left: 3px solid #6366f1; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .forward-title { font-size: 11px; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .forward-text { font-size: 13px; color: #c7d2fe; line-height: 1.6; }
+
+  .correlation-box { background: #080c14; border: 1px solid #1e3a5f; border-left: 3px solid #38bdf8; border-radius: 10px; padding: 14px 16px; }
+  .correlation-title { font-size: 11px; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  .stock-panel { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 14px; padding: 20px; margin-bottom: 20px; }
+  .stock-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .stock-ticker { font-size: 24px; font-weight: 700; color: #38bdf8; }
+  .stock-price { font-size: 28px; font-weight: 700; }
+  .stock-change-pos { color: #34d399; font-size: 16px; }
+  .stock-change-neg { color: #f87171; font-size: 16px; }
+  .stock-stats { display: flex; gap: 24px; margin-top: 8px; }
+  .stock-stat { font-size: 12px; color: #64748b; }
+  .stock-stat span { display: block; color: #94a3b8; font-size: 14px; margin-top: 2px; }
+  .chart-wrap { height: 100px; margin-top: 16px; }
+
+  .news-card { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 12px; padding: 18px; margin-bottom: 14px; cursor: pointer; transition: all 0.2s; }
+  .news-card:hover { border-color: #38bdf8; transform: translateY(-1px); }
+  .news-title { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; }
+  .news-desc { font-size: 13px; color: #64748b; margin-bottom: 10px; line-height: 1.5; }
+  .news-meta { display: flex; justify-content: space-between; align-items: center; }
+  .news-source { font-size: 11px; color: #475569; background: #1e293b; padding: 3px 10px; border-radius: 4px; }
+  .news-link { font-size: 12px; color: #38bdf8; text-decoration: none; }
+
+  .loading { text-align: center; padding: 60px; color: #475569; }
+  .spinner { width: 40px; height: 40px; border: 3px solid #1e3a5f; border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .section-title { font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 768px) {
+    .macro-bar { grid-template-columns: repeat(2, 1fr); }
+    .insight-grid { grid-template-columns: 1fr; }
+    .container { padding: 16px; }
+    header { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Blue Peak Capital <span>AI Market Intelligence</span></div>
+  <div class="mode-badge" id="modeBadge">Live Mode</div>
+</header>
+
+<nav>
+  <div class="nav-tab active" onclick="switchTab('insights')">Market Insights</div>
+  <div class="nav-tab" onclick="switchTab('news')">News Feed</div>
+  <div class="nav-tab" onclick="switchTab('overview')">Market Overview</div>
+</nav>
+
+<div class="container">
+
+  <div class="search-bar">
+    <input class="search-input" id="searchInput" type="text" placeholder="Search any sector, company or theme... e.g. NVIDIA, Gold, India IT" onkeydown="if(event.key==='Enter') doSearch()">
+    <button class="btn btn-primary" onclick="doSearch()">Analyze</button>
+    <button class="btn btn-demo" onclick="doSearch(true)">Demo Mode</button>
+  </div>
+
+  <div id="macroBar" class="macro-bar" style="display:none"></div>
+  <div id="fgBar" class="fg-bar" style="display:none"></div>
+
+  <div id="insightsTab" class="tab-content active">
+    <div id="insightsContent">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>Loading market intelligence...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="newsTab" class="tab-content">
+    <div id="newsContent"><div class="loading"><div>Search a keyword to load news</div></div></div>
+  </div>
+
+  <div id="overviewTab" class="tab-content">
+    <div id="overviewContent"><div class="loading"><div class="spinner"></div><div>Loading market overview...</div></div></div>
+  </div>
+
+</div>
+
+<script>
+const API = 'https://blue-peak-capital-production.up.railway.app';
+let stockChart = null;
+let currentMode = 'live';
+
+async function init() {
+  await loadOverview();
+  await loadDemoInsights();
+}
+
+async function loadOverview() {
+  try {
+    const r = await fetch(API + '/api/market-overview');
+    const d = await r.json();
+    renderMacro(d.macro);
+    renderFG(d.fear_greed);
+    renderOverview(d);
+  } catch(e) {
+    renderMacro({fed_rate:'5.25-5.50%', inflation_cpi:'3.2%', gdp_growth:'2.1%', unemployment:'3.8%'});
+    renderFG({value:68, label:'Greed'});
+  }
+}
+
+async function loadDemoInsights() {
+  try {
+    const r = await fetch(API + '/api/insights/demo');
+    const d = await r.json();
+    renderInsights(d.insights, []);
+  } catch(e) {}
+}
+
+function renderMacro(macro) {
+  const bar = document.getElementById('macroBar');
+  bar.style.display = 'grid';
+  bar.innerHTML = [
+    ['Fed Rate', macro.fed_rate],
+    ['Inflation (CPI)', macro.inflation_cpi],
+    ['GDP Growth', macro.gdp_growth],
+    ['Unemployment', macro.unemployment]
+  ].map(([label, val]) =>
+    '<div class="macro-card"><div class="macro-label">' + label + '</div><div class="macro-value">' + val + '</div></div>'
+  ).join('');
+}
+
+function renderFG(fg) {
+  const bar = document.getElementById('fgBar');
+  bar.style.display = 'flex';
+  const pct = fg.value;
+  const color = pct >= 75 ? '#22c55e' : pct >= 55 ? '#84cc16' : pct >= 45 ? '#eab308' : pct >= 25 ? '#f97316' : '#ef4444';
+  bar.innerHTML =
+    '<div class="fg-label">FEAR & GREED INDEX</div>' +
+    '<div class="fg-value" style="color:' + color + '">' + pct + '</div>' +
+    '<div class="fg-track"><div class="fg-dot" style="left:' + pct + '%"></div></div>' +
+    '<div class="fg-tag" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '44">' + fg.label + '</div>';
+}
+
+function renderInsights(insights, news) {
+  const el = document.getElementById('insightsContent');
+  if (!insights || insights.length === 0) {
+    el.innerHTML = '<div class="loading"><div>No insights found. Try a different keyword.</div></div>';
+    return;
+  }
+  el.innerHTML = insights.map(ins => buildInsightCard(ins)).join('');
+  if (news && news.length > 0) {
+    document.getElementById('newsContent').innerHTML = news.map(n => buildNewsCard(n)).join('');
+  }
+}
+
+function buildInsightCard(ins) {
+  const trendClass = ins.trend === 'Bullish' ? 'trend-bull' : ins.trend === 'Bearish' ? 'trend-bear' : 'trend-neu';
+  const drivers = Array.isArray(ins.key_drivers) ? ins.key_drivers : [ins.key_drivers];
+  const risks = Array.isArray(ins.risk_factors) ? ins.risk_factors : [ins.risk_factors];
+  const companies = Array.isArray(ins.impacted_companies) ? ins.impacted_companies : [ins.impacted_companies];
+
+  return '<div class="insight-card">' +
+    '<div class="insight-header">' +
+      '<div><div class="insight-sector">' + ins.sector + '</div>' +
+      '<div class="insight-horizon">' + ins.time_horizon + '</div></div>' +
+      '<div class="trend-badge ' + trendClass + '">' + ins.trend + '</div>' +
+    '</div>' +
+    '<div class="confidence-bar">' +
+      '<div class="confidence-label"><span>AI Confidence</span><span>' + ins.confidence + '%</span></div>' +
+      '<div class="confidence-track"><div class="confidence-fill" style="width:' + ins.confidence + '%"></div></div>' +
+    '</div>' +
+    '<div class="insight-grid">' +
+      '<div class="insight-section">' +
+        '<div class="insight-section-title">Key Drivers</div>' +
+        drivers.map(d => '<div class="tag">' + d + '</div>').join('') +
+      '</div>' +
+      '<div class="insight-section">' +
+        '<div class="insight-section-title">Risk Factors</div>' +
+        risks.map(r => '<div class="tag tag-risk">' + r + '</div>').join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="insight-section" style="margin-bottom:16px">' +
+      '<div class="insight-section-title">Impacted Companies</div>' +
+      companies.map(c => '<div class="tag">' + c + '</div>').join('') +
+    '</div>' +
+    '<div class="forward-box">' +
+      '<div class="forward-title">What Happens Next</div>' +
+      '<div class="forward-text">' + ins.what_happens_next + '</div>' +
+    '</div>' +
+    (ins.correlation ? '<div class="correlation-box">' +
+      '<div class="correlation-title">Cross-Sector Correlation</div>' +
+      '<div class="insight-text">' + ins.correlation + '</div>' +
+    '</div>' : '') +
+    (ins.macro_context ? '<div class="insight-text" style="margin-top:12px;font-size:12px;color:#475569">Macro: ' + ins.macro_context + '</div>' : '') +
+  '</div>';
+}
+
+function buildNewsCard(n) {
+  return '<div class="news-card" onclick="window.open(\'' + n.url + '\',\'_blank\')">' +
+    '<div class="news-title">' + n.title + '</div>' +
+    '<div class="news-desc">' + (n.description || '') + '</div>' +
+    '<div class="news-meta">' +
+      '<span class="news-source">' + (n.source || '') + '</span>' +
+      '<a class="news-link" href="' + n.url + '" target="_blank">Read more</a>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderStockPanel(stock) {
+  if (!stock) return '';
+  const changeClass = stock.change_pct >= 0 ? 'stock-change-pos' : 'stock-change-neg';
+  const sign = stock.change_pct >= 0 ? '+' : '';
+  return '<div class="stock-panel" id="stockPanel">' +
+    '<div class="stock-header">' +
+      '<div>' +
+        '<div class="stock-ticker">' + stock.ticker + '</div>' +
+        '<div class="stock-price">$' + stock.current_price + '</div>' +
+        '<div class="' + changeClass + '">' + sign + stock.change_pct + '% today</div>' +
+      '</div>' +
+      '<div class="stock-stats">' +
+        '<div class="stock-stat">52W High<span>$' + stock.week_52_high + '</span></div>' +
+        '<div class="stock-stat">52W Low<span>$' + stock.week_52_low + '</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="chart-wrap"><canvas id="stockChart"></canvas></div>' +
+  '</div>';
+}
+
+function drawChart(chartData, changePositive) {
+  setTimeout(() => {
+    const canvas = document.getElementById('stockChart');
+    if (!canvas) return;
+    if (stockChart) stockChart.destroy();
+    const color = changePositive ? '#34d399' : '#f87171';
+    stockChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: chartData.map((_, i) => i),
+        datasets: [{
+          data: chartData,
+          borderColor: color,
+          backgroundColor: color + '22',
+          borderWidth: 2,
+          fill: true,
+          pointRadius: 0,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { display: false }, y: { display: false } }
+      }
+    });
+  }, 100);
+}
+
+async function doSearch(forceDemo = false) {
+  const keyword = document.getElementById('searchInput').value.trim();
+  if (!keyword) return;
+
+  const mode = forceDemo ? 'demo' : 'live';
+  currentMode = mode;
+
+  document.getElementById('insightsContent').innerHTML = '<div class="loading"><div class="spinner"></div><div>Analyzing ' + keyword + '...</div></div>';
+  document.getElementById('newsContent').innerHTML = '<div class="loading"><div class="spinner"></div><div>Loading news...</div></div>';
+  switchTab('insights');
+
+  try {
+    const r = await fetch(API + '/api/search?keyword=' + encodeURIComponent(keyword) + '&mode=' + mode);
+    const d = await r.json();
+
+    const badge = document.getElementById('modeBadge');
+    if (d.mode === 'demo' || d.mode === 'demo_fallback') {
+      badge.textContent = 'Demo Mode';
+      badge.className = 'mode-badge demo';
+    } else {
+      badge.textContent = 'Live Mode';
+      badge.className = 'mode-badge';
+    }
+
+    let html = '';
+    if (d.stock) {
+      html += renderStockPanel(d.stock);
+    }
+    if (d.insight) {
+      html += buildInsightCard(d.insight);
+    }
+    document.getElementById('insightsContent').innerHTML = html || '<div class="loading"><div>No data found.</div></div>';
+
+    if (d.stock && d.stock.chart_data) {
+      drawChart(d.stock.chart_data, d.stock.change_pct >= 0);
+    }
+
+    if (d.news) {
+      document.getElementById('newsContent').innerHTML = d.news.map(n => buildNewsCard(n)).join('');
+    }
+
+  } catch(e) {
+    document.getElementById('insightsContent').innerHTML = '<div class="loading"><div>Connection error. Is the backend running?</div></div>';
+  }
+}
+
+function renderOverview(d) {
+  const crypto = d.crypto || {};
+  const btc = crypto.bitcoin;
+  const eth = crypto.ethereum;
+  let html = '<div class="section-title">Live Crypto Prices</div>';
+  if (btc) {
+    const c = btc.change_24h >= 0 ? 'stock-change-pos' : 'stock-change-neg';
+    html += '<div class="insight-card" style="display:flex;justify-content:space-between;align-items:center"><div class="stock-ticker">BTC</div><div><div class="stock-price">$' + btc.price.toLocaleString() + '</div><div class="' + c + '">' + (btc.change_24h >= 0 ? '+' : '') + btc.change_24h + '% (24h)</div></div></div>';
+  }
+  if (eth) {
+    const c = eth.change_24h >= 0 ? 'stock-change-pos' : 'stock-change-neg';
+    html += '<div class="insight-card" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><div class="stock-ticker">ETH</div><div><div class="stock-price">$' + eth.price.toLocaleString() + '</div><div class="' + c + '">' + (eth.change_24h >= 0 ? '+' : '') + eth.change_24h + '% (24h)</div></div></div>';
+  }
+  document.getElementById('overviewContent').innerHTML = html;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['insights','news','overview'][i] === tab);
+  });
+  document.getElementById('insightsTab').classList.toggle('active', tab === 'insights');
+  document.getElementById('newsTab').classList.toggle('active', tab === 'news');
+  document.getElementById('overviewTab').classList.toggle('active', tab === 'overview');
+}
+
+init();
+</script>
+</body>
+</html>
